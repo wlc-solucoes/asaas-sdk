@@ -23,8 +23,7 @@ class Customer:
         municipalInscription: Optional[str] = None,
         stateInscription: Optional[str] = None,
         observations: Optional[str] = None,
-        groupName: Optional[str] = None,
-        company: Optional[str] = None,
+        **kwargs
     ) -> None:
 
         self.id = id
@@ -46,8 +45,6 @@ class Customer:
         self.municipalInscription = municipalInscription
         self.stateInscription = stateInscription
         self.observations = observations
-        self.groupName = groupName
-        self.company = company
 
     def to_json(self):
         return {
@@ -68,7 +65,5 @@ class Customer:
             'additionalEmails': self.additionalEmails,
             'municipalInscription': self.municipalInscription,
             'stateInscription': self.stateInscription,
-            'observations': self.observations,
-            'groupName': self.groupName,
-            'company': self.company
+            'observations': self.observations
         }
