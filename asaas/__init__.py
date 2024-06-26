@@ -32,7 +32,7 @@ class Asaas:
         """Make a GET request to Asaas API"""
 
         response = requests.get(
-            f'{self.base_url}/{endpoint}',
+            f'{self.base_url}/{endpoint}/',
             headers=self.headers,
             params=params
         )
@@ -48,7 +48,7 @@ class Asaas:
         """Make a POST request to Asaas API"""
 
         response = requests.post(
-            f'{self.base_url}/{endpoint}',
+            f'{self.base_url}/{endpoint}/',
             headers=self.headers,
             json=data
         )
@@ -64,7 +64,7 @@ class Asaas:
         """Make a PUT request to Asaas API"""
 
         response = requests.put(
-            f'{self.base_url}/{endpoint}',
+            f'{self.base_url}/{endpoint}/',
             headers=self.headers,
             json=data
         )
@@ -79,7 +79,7 @@ class Asaas:
         """Make a DELETE request to Asaas API"""
 
         response = requests.delete(
-            f'{self.base_url}/{endpoint}',
+            f'{self.base_url}/{endpoint}/',
             headers=self.headers
         )
         raise_for_status(response)
@@ -88,8 +88,11 @@ class Asaas:
 
 
 class Costumers:
+    """Class to manage customers in Asaas API"""
+
     def __init__(self, asaas: Asaas):
         self.asaas = asaas
+        self.endpoint = 'customers'
 
     def retrieve(
         self,
@@ -97,7 +100,7 @@ class Costumers:
     ) -> Customer:
         """Retrieve a customer by ID"""
 
-        response = self.asaas.get(f'customers/{customer_id}')
+        response = self.asaas.get(f'{self.endpoint}/{customer_id}')
 
         return Customer(**response.json())
 
@@ -147,7 +150,7 @@ class Costumers:
             }
         )
 
-        response = self.asaas.post('customers', data)
+        response = self.asaas.post(f'{self.endpoint}', data)
 
         return Customer(**response.json())
 
@@ -175,7 +178,7 @@ class Costumers:
             }
         )
 
-        response = self.asaas.get('customers', params)
+        response = self.asaas.get(self.endpoint, params)
 
         return [Customer(**customer) for customer in response.json()['data']]
 
@@ -227,7 +230,7 @@ class Costumers:
         )
 
         response = self.asaas.put(
-            f'customers/{customer_id}',
+            f'{self.endpoint}/{customer_id}',
             data
         )
 
@@ -247,6 +250,6 @@ class Costumers:
     ) -> Customer:
         """Restore a customer by ID"""
 
-        response = self.asaas.post(f'customers/{customer_id}/restore')
-        
+        response = self.asaas.post(f'{self.endpoint}/{customer_id}/restore')
+
         return Customer(**response.json())
