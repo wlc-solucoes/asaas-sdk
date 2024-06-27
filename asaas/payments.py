@@ -1,10 +1,9 @@
 from typing import Optional
 from datetime import date
+from enum import Enum
 
-from asaas.customer import Customer
 
-
-class Status:
+class Status(Enum):
     """Status for payment"""
 
     PENDING = 'PENDING'
@@ -23,7 +22,7 @@ class Status:
     AWAITING_RISK_ANALYSIS = 'AWAITING_RISK_ANALYSIS'
 
 
-class BillingType:
+class BillingType(Enum):
     """Billing type for payment"""
 
     BOLETO = 'BOLETO'
@@ -48,7 +47,8 @@ class Discount:
         self,
         value: int,
         dueDateLimitDays: int,
-        type: Type
+        type: Type,
+        **kwargs
     ) -> None:
         self.value = value
         self.dueDateLimitDays = dueDateLimitDays
@@ -68,6 +68,7 @@ class Interest:
     def __init__(
         self,
         value: float,
+        **kwargs
     ) -> None:
         self.value = value
 
@@ -87,7 +88,8 @@ class Fine:
     def __init__(
         self,
         value: float,
-        type: Type
+        type: Type,
+        **kwargs
     ) -> None:
 
         self.value = value
@@ -112,7 +114,8 @@ class Refund:
         status: Status,
         value: float,
         description: str,
-        transactionReceiptUrl: str
+        transactionReceiptUrl: str,
+        **kwargs
     ) -> None:
         self.dateCreated = dateCreated
         self.status = status
@@ -138,7 +141,8 @@ class Split:
         walletId: str,
         fixedValue: Optional[float] = None,
         percentageValue: Optional[float] = None,
-        totalFixedValue: Optional[float] = None
+        totalFixedValue: Optional[float] = None,
+        **kwargs
     ) -> None:
         self.walletId = walletId
         self.fixedValue = fixedValue
@@ -157,7 +161,7 @@ class Split:
 class Chargeback:
     """Chargeback object for payment"""
 
-    class Status:
+    class Status(Enum):
         """Status for chargeback"""
         REQUESTED = 'REQUESTED'
         IN_DISPUTE = 'IN_DISPUTE'
@@ -165,7 +169,7 @@ class Chargeback:
         REVERSED = 'REVERSED'
         DONE = 'DONE'
 
-    class Reason:
+    class Reason(Enum):
         """Reason for chargeback"""
         ABSENCE_OF_PRINT = 'ABSENCE_OF_PRINT'
         ABSENT_CARD_FRAUD = 'ABSENT_CARD_FRAUD'
@@ -225,7 +229,7 @@ class Payment:
     def __init__(
         self,
         id: str,
-        customer: Customer,
+        customer: str,
         dateCreated: date,
         dueDate: date,
         value: float,
@@ -261,7 +265,6 @@ class Payment:
         anticipable: Optional[bool] = None,
         refunds: Optional[list[Refund]] = [],
         split: Optional[list[Split]] = [],
-        chargeback: Optional[Chargeback] = None,
         **kwargs
     ):
         self.id = id
@@ -284,9 +287,16 @@ class Payment:
         self.pixQrCodeId = pixQrCodeId
         self.originalValue = originalValue
         self.interestValue = interestValue
-        self.originalDueDate = originalDueDate
-        self.paymentDate = paymentDate
-        self.clientPaymentDate = clientPaymentDate
+
+        self.originalDueDate = originalDueDate if type(
+            originalDueDate) == date else date.fromisoformat(originalDueDate) if originalDueDate else None
+
+        self.paymentDate = paymentDate if type(
+            paymentDate) == date else date.fromisoformat(paymentDate) if paymentDate else None
+
+        self.clientPaymentDate = clientPaymentDate if type(
+            clientPaymentDate) == date else date.fromisoformat(clientPaymentDate) if clientPaymentDate else None
+
         self.installmentNumber = installmentNumber
         self.transactionReceiptUrl = transactionReceiptUrl
         self.duplicatedPayment = duplicatedPayment
@@ -303,12 +313,11 @@ class Payment:
         self.anticipable = anticipable
         self.refunds = refunds
         self.split = split
-        self.chargeback = chargeback
 
     def to_json(self) -> dict:
         return {
             'id': self.id,
-            'customer': self.customer.to_json(),
+            'customer': self.customer,
             'dateCreated': self.dateCreated.strftime('%Y-%m-%d'),
             'dueDate': self.dueDate.strftime('%Y-%m-%d'),
             'value': self.value,
@@ -342,7 +351,6 @@ class Payment:
             'postalService': self.postalService,
             'anticipated': self.anticipated,
             'anticipable': self.anticipable,
-            'refunds': [refund.to_json() for refund in self.refunds],
-            'split': [split.to_json() for split in self.split],
-            'chargeback': self.chargeback
+            'refunds': [refund.to_json() for refund in self.refunds] if self.refunds else None,
+            'split': [split.to_json() for split in self.split] if self.split else None
         }
