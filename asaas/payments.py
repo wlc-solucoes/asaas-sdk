@@ -54,7 +54,7 @@ class Discount:
         self.dueDateLimitDays = dueDateLimitDays
         self.type = type
 
-    def to_json(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'value': self.value,
             'dueDateLimitDays': self.dueDateLimitDays,
@@ -72,7 +72,7 @@ class Interest:
     ) -> None:
         self.value = value
 
-    def to_json(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'value': self.value,
         }
@@ -95,7 +95,7 @@ class Fine:
         self.value = value
         self.type = type
 
-    def to_json(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'value': self.value,
             'type': self.type
@@ -123,7 +123,7 @@ class Refund:
         self.description = description
         self.transactionReceiptUrl = transactionReceiptUrl
 
-    def to_json(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'dateCreated': self.dateCreated,
             'status': self.status,
@@ -149,7 +149,7 @@ class Split:
         self.percentageValue = percentageValue
         self.totalFixedValue = totalFixedValue
 
-    def to_json(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'walletId': self.walletId,
             'fixedValue': self.fixedValue,
@@ -216,7 +216,7 @@ class Callback:
         self.sucessUrl = sucessUrl
         self.autoRedirect = autoRedirect
 
-    def to_json(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'sucessUrl': self.sucessUrl,
             'autoRedirect': self.autoRedirect
@@ -314,7 +314,7 @@ class Payment:
         self.refunds = refunds
         self.split = split
 
-    def to_json(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'id': self.id,
             'customer': self.customer,
@@ -344,13 +344,13 @@ class Payment:
             'invoiceUrl': self.invoiceUrl,
             'bankSlipUrl': self.bankSlipUrl,
             'invoiceNumber': self.invoiceNumber,
-            'discount': self.discount.to_json() if self.discount else None,
-            'fine': self.fine.to_json() if self.fine else None,
-            'interest': self.interest.to_json() if self.interest else None,
+            'discount': self.discount.to_dict() if self.discount else None,
+            'fine': self.fine.to_dict() if self.fine else None,
+            'interest': self.interest.to_dict() if self.interest else None,
             'deleted': self.deleted,
             'postalService': self.postalService,
             'anticipated': self.anticipated,
             'anticipable': self.anticipable,
-            'refunds': [refund.to_json() for refund in self.refunds] if self.refunds else None,
-            'split': [split.to_json() for split in self.split] if self.split else None
+            'refunds': [refund.to_dict() for refund in self.refunds] if self.refunds else None,
+            'split': [split.to_dict() for split in self.split] if self.split else None
         }

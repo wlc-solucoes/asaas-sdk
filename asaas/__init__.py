@@ -331,11 +331,11 @@ class Payments:
         split: Optional[Split] = None,
         callback: Optional[Callback] = None
     ) -> Payment:
-        discount = discount.to_json() if discount else None
-        interest = interest.to_json() if interest else None
-        fine = fine.to_json() if fine else None
-        split = split.to_json() if split else None
-        callback = callback.to_json() if callback else None
+        discount = discount.to_dict() if discount else None
+        interest = interest.to_dict() if interest else None
+        fine = fine.to_dict() if fine else None
+        split = split.to_dict() if split else None
+        callback = callback.to_dict() if callback else None
 
         data = remove_none_and_empty_values(
             {
@@ -443,11 +443,11 @@ class Payments:
         callback: Optional[Callback] = None
     ) -> Payment:
 
-        discount = discount.to_json() if discount else None
-        interest = interest.to_json() if interest else None
-        fine = fine.to_json() if fine else None
-        split = split.to_json() if split else None
-        callback = callback.to_json() if callback else None
+        discount = discount.to_dict() if discount else None
+        interest = interest.to_dict() if interest else None
+        fine = fine.to_dict() if fine else None
+        split = split.to_dict() if split else None
+        callback = callback.to_dict() if callback else None
 
         data = remove_none_and_empty_values(
             {

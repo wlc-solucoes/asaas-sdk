@@ -46,7 +46,7 @@ class Customer:
         self.stateInscription = stateInscription
         self.observations = observations
 
-    def to_json(self):
+    def to_dict(self):
         return {
             'id': self.id,
             'dateCreated': self.dateCreated.strftime('%Y-%m-%d'),
