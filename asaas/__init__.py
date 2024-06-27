@@ -1,11 +1,25 @@
 from asaas.exceptions import raise_for_status
 from asaas.customer import Customer
+from asaas.payments import (
+    BillingType,
+    Chargeback,
+    Payment,
+    Discount,
+    Interest,
+    Fine,
+    Refund,
+    Split,
+    Callback,
+    Status
+)
 from asaas.utils import remove_none_and_empty_values
 
 import requests
 from requests import Response
 
 from typing import Optional
+
+from datetime import date
 
 
 class Asaas:
@@ -16,13 +30,13 @@ class Asaas:
         api_key: str,
         production: bool = False
     ):
-        print(api_key)
         self.base_url = 'https://www.asaas.com/api/v3' if production else 'https://sandbox.asaas.com/api/v3'
         self.headers = {
             'access_token': api_key
         }
 
         self.customers = Costumers(self)
+        self.payments = Payments(self)
 
     def get(
         self,
@@ -253,3 +267,260 @@ class Costumers:
         response = self.asaas.post(f'{self.endpoint}/{customer_id}/restore')
 
         return Customer(**response.json())
+
+
+class Payments:
+    def __init__(self, asaas: Asaas):
+        self.asaas = asaas
+        self.endpoint = 'payments'
+
+    def response_data_to_payment(
+        self,
+        data: dict
+    ):
+        data['discount'] = Discount(
+            **data['discount']
+        ) if data.get('discount') else None
+
+        data['interest'] = Interest(
+            **data['interest']
+        ) if data.get('interest') else None
+
+        data['fine'] = Fine(**data['fine']) if data.get('fine') else None
+
+        data['split'] = [
+            Split(**split) for split in data['split']
+        ] if data.get('split') else None
+
+        data['chargeback'] = Chargeback(
+            **data['chargeback']
+        ) if data.get('chargeback') else None
+
+        data['refunds'] = [
+            Refund(**refund) for refund in data['refunds']
+        ] if data.get('refunds') else None
+
+        return Payment(**data)
+
+    def retrieve(
+        self,
+        payment_id: str
+    ) -> Payment:
+        """Retrieve a payment by ID"""
+
+        response = self.asaas.get(f'{self.endpoint}/{payment_id}')
+
+        return self.response_data_to_payment(response.json())
+
+    def create(
+        self,
+        customer: str,
+        value: float,
+        dueDate: date,
+        billingType: BillingType = BillingType.UNDEFINED,
+        description: Optional[str] = None,
+        daysAfterDueDateToRegistrationCancellation: Optional[int] = None,
+        externalReference: Optional[str] = None,
+        installmentCount: Optional[int] = None,
+        totalValue: Optional[float] = None,
+        installmentValue: Optional[float] = None,
+        discount: Optional[Discount] = None,
+        interest: Optional[Interest] = None,
+        fine: Optional[Fine] = None,
+        postalService: Optional[bool] = None,
+        split: Optional[Split] = None,
+        callback: Optional[Callback] = None
+    ) -> Payment:
+        discount = discount.to_json() if discount else None
+        interest = interest.to_json() if interest else None
+        fine = fine.to_json() if fine else None
+        split = split.to_json() if split else None
+        callback = callback.to_json() if callback else None
+
+        data = remove_none_and_empty_values(
+            {
+                'customer': customer,
+                'billingType': billingType.value,
+                'value': value,
+                'dueDate': dueDate,
+                'description': description,
+                'daysAfterDueDateToRegistrationCancellation': daysAfterDueDateToRegistrationCancellation,
+                'externalReference': externalReference,
+                'installmentCount': installmentCount,
+                'totalValue': totalValue,
+                'installmentValue': installmentValue,
+                'discount': discount,
+                'interest': interest,
+                'fine': fine,
+                'postalService': postalService,
+                'split': split,
+                'callback': callback
+            }
+        )
+
+        response = self.asaas.post(f'{self.endpoint}', data)
+
+        return self.response_data_to_payment(response.json())
+
+    def list(
+        self,
+        customer: Optional[str] = None,
+        customerGroupName: Optional[str] = None,
+        billingType: Optional[BillingType] = None,
+        status: Optional[Status] = None,
+        subscription: Optional[str] = None,
+        installment: Optional[str] = None,
+        externalReference: Optional[str] = None,
+        paymentDate: Optional[date] = None,
+        invoiceStatus: Optional[str] = None,
+        estimatedCreditDate: Optional[date] = None,
+        pixQrCodeId: Optional[str] = None,
+        antipated: Optional[bool] = None,
+        dateCreatedGreaterThanOrEqual: Optional[date] = None,
+        dateCreatedLessThanOrEqual: Optional[date] = None,
+        paymentDateGreaterThanOrEqual: Optional[date] = None,
+        paymentDateLessThanOrEqual: Optional[date] = None,
+        estimatedCreditDateGreaterThanOrEqual: Optional[date] = None,
+        estimatedCreditDateLessThanOrEqual: Optional[date] = None,
+        dueDateGreaterThanOrEqual: Optional[date] = None,
+        dueDateLessThanOrEqual: Optional[date] = None,
+        user: Optional[str] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None
+    ) -> list[Payment]:
+        """List payments"""
+
+        params = remove_none_and_empty_values(
+            {
+                'customer': customer,
+                'customerGroupName': customerGroupName,
+                'billingType': billingType.value if billingType else None,
+                'status': status.value if status else None,
+                'subscription': subscription,
+                'installment': installment,
+                'externalReference': externalReference,
+                'paymentDate': paymentDate,
+                'invoiceStatus': invoiceStatus,
+                'estimatedCreditDate': estimatedCreditDate,
+                'pixQrCodeId': pixQrCodeId,
+                'antipated': antipated,
+                'dateCreatedGreaterThanOrEqual': dateCreatedGreaterThanOrEqual,
+                'dateCreatedLessThanOrEqual': dateCreatedLessThanOrEqual,
+                'paymentDateGreaterThanOrEqual': paymentDateGreaterThanOrEqual,
+                'paymentDateLessThanOrEqual': paymentDateLessThanOrEqual,
+                'estimatedCreditDateGreaterThanOrEqual': estimatedCreditDateGreaterThanOrEqual,
+                'estimatedCreditDateLessThanOrEqual': estimatedCreditDateLessThanOrEqual,
+                'dueDateGreaterThanOrEqual': dueDateGreaterThanOrEqual,
+                'dueDateLessThanOrEqual': dueDateLessThanOrEqual,
+                'user': user,
+                'offset': offset,
+                'limit': limit
+            }
+        )
+
+        response = self.asaas.get(self.endpoint, params)
+
+        return [self.response_data_to_payment(payment) for payment in response.json()['data']]
+
+    def update(
+        self,
+        payment_id: str,
+        customer: str,
+        value: float,
+        dueDate: date,
+        billingType: BillingType = BillingType.UNDEFINED,
+        description: Optional[str] = None,
+        daysAfterDueDateToRegistrationCancellation: Optional[int] = None,
+        externalReference: Optional[str] = None,
+        installmentCount: Optional[int] = None,
+        totalValue: Optional[float] = None,
+        installmentValue: Optional[float] = None,
+        discount: Optional[Discount] = None,
+        interest: Optional[Interest] = None,
+        fine: Optional[Fine] = None,
+        postalService: Optional[bool] = None,
+        split: Optional[Split] = None,
+        callback: Optional[Callback] = None
+    ) -> Payment:
+
+        discount = discount.to_json() if discount else None
+        interest = interest.to_json() if interest else None
+        fine = fine.to_json() if fine else None
+        split = split.to_json() if split else None
+        callback = callback.to_json() if callback else None
+
+        data = remove_none_and_empty_values(
+            {
+                'customer': customer,
+                'billingType': billingType.value,
+                'value': value,
+                'dueDate': dueDate,
+                'description': description,
+                'daysAfterDueDateToRegistrationCancellation': daysAfterDueDateToRegistrationCancellation,
+                'externalReference': externalReference,
+                'installmentCount': installmentCount,
+                'totalValue': totalValue,
+                'installmentValue': installmentValue,
+                'discount': discount,
+                'interest': interest,
+                'fine': fine,
+                'postalService': postalService,
+                'split': split,
+                'callback': callback
+            }
+        )
+
+        response = self.asaas.put(
+            f'{self.endpoint}/{payment_id}',
+            data
+        )
+
+        return self.response_data_to_payment(response.json())
+
+    def delete(
+        self,
+        payment_id: str
+    ) -> None:
+        """Delete a payment by ID"""
+
+        self.asaas.delete(f'payments/{payment_id}')
+
+    def restore(
+        self,
+        payment_id: str
+    ) -> Payment:
+        """Restore a payment by ID"""
+
+        response = self.asaas.post(f'{self.endpoint}/{payment_id}/restore')
+
+        return self.response_data_to_payment(response.json())
+
+    def retrieve_payment_status(
+        self,
+        payment_id: str
+    ) -> Status:
+        """Retrieve a payment status by ID"""
+
+        response = self.asaas.get(f'{self.endpoint}/{payment_id}/status')
+
+        return Status(**response.json())
+
+    def refund(
+        self,
+        payment_id: str,
+        value: Optional[float] = None,
+        description: Optional[str] = None
+    ) -> Payment:
+        """Refund a payment by ID"""
+
+        data = remove_none_and_empty_values(
+            {
+                'value': value,
+                'description': description
+            }
+        )
+
+        response = self.asaas.post(
+            f'{self.endpoint}/{payment_id}/refund', data)
+
+        return self.response_data_to_payment(response.json())
