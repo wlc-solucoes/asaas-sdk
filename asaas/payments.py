@@ -1,4 +1,7 @@
 from typing import Optional
+from datetime import date
+
+from asaas.customer import Customer
 
 
 class Status:
@@ -152,7 +155,10 @@ class Split:
 
 
 class Chargeback:
+    """Chargeback object for payment"""
+
     class Status:
+        """Status for chargeback"""
         REQUESTED = 'REQUESTED'
         IN_DISPUTE = 'IN_DISPUTE'
         DISPUTE_LOST = 'DISPUTE_LOST'
@@ -160,6 +166,7 @@ class Chargeback:
         DONE = 'DONE'
 
     class Reason:
+        """Reason for chargeback"""
         ABSENCE_OF_PRINT = 'ABSENCE_OF_PRINT'
         ABSENT_CARD_FRAUD = 'ABSENT_CARD_FRAUD'
         CARD_ACTIVATED_PHONE_TRANSACTION = 'CARD_ACTIVATED_PHONE_TRANSACTION'
@@ -209,4 +216,133 @@ class Callback:
         return {
             'sucessUrl': self.sucessUrl,
             'autoRedirect': self.autoRedirect
+        }
+
+
+class Payment:
+    """ Payment object for Asaas API """
+
+    def __init__(
+        self,
+        id: str,
+        customer: Customer,
+        dateCreated: date,
+        dueDate: date,
+        value: float,
+        installment: Optional[str] = None,
+        subscription: Optional[str] = None,
+        paymentLink: Optional[str] = None,
+        netValue: Optional[float] = None,
+        billingType: Optional[BillingType] = None,
+        status: Optional[Status] = None,
+        description: Optional[str] = None,
+        externalReference: Optional[str] = None,
+        canBePaidAfterDueDate: Optional[bool] = None,
+        pixTransaction: Optional[str] = None,
+        pixQrCodeId: Optional[str] = None,
+        originalValue: Optional[float] = None,
+        interestValue: Optional[float] = None,
+        originalDueDate: Optional[date] = None,
+        paymentDate: Optional[date] = None,
+        clientPaymentDate: Optional[date] = None,
+        installmentNumber: Optional[int] = None,
+        transactionReceiptUrl: Optional[str] = None,
+        duplicatedPayment: Optional[str] = None,
+        nossoNumero: Optional[str] = None,
+        invoiceUrl: Optional[str] = None,
+        bankSlipUrl: Optional[str] = None,
+        invoiceNumber: Optional[str] = None,
+        discount: Optional[Discount] = None,
+        fine: Optional[Fine] = None,
+        interest: Optional[Interest] = None,
+        deleted: Optional[bool] = None,
+        postalService: Optional[bool] = None,
+        anticipated: Optional[bool] = None,
+        anticipable: Optional[bool] = None,
+        refunds: Optional[list[Refund]] = None,
+        split: Optional[list[Split]] = None,
+        chargeback: Optional[Chargeback] = None,
+        **kwargs
+    ):
+        self.id = id
+        self.customer = customer
+        self.dateCreated = dateCreated if type(
+            dateCreated) == date else date.fromisoformat(dateCreated)
+        self.dueDate = dueDate if type(
+            dueDate) == date else date.fromisoformat(dueDate)
+        self.value = value
+        self.installment = installment
+        self.subscription = subscription
+        self.paymentLink = paymentLink
+        self.netValue = netValue
+        self.billingType = billingType
+        self.status = status
+        self.description = description
+        self.externalReference = externalReference
+        self.canBePaidAfterDueDate = canBePaidAfterDueDate
+        self.pixTransaction = pixTransaction
+        self.pixQrCodeId = pixQrCodeId
+        self.originalValue = originalValue
+        self.interestValue = interestValue
+        self.originalDueDate = originalDueDate
+        self.paymentDate = paymentDate
+        self.clientPaymentDate = clientPaymentDate
+        self.installmentNumber = installmentNumber
+        self.transactionReceiptUrl = transactionReceiptUrl
+        self.duplicatedPayment = duplicatedPayment
+        self.nossoNumero = nossoNumero
+        self.invoiceUrl = invoiceUrl
+        self.bankSlipUrl = bankSlipUrl
+        self.invoiceNumber = invoiceNumber
+        self.discount = discount
+        self.fine = fine
+        self.interest = interest
+        self.deleted = deleted
+        self.postalService = postalService
+        self.anticipated = anticipated
+        self.anticipable = anticipable
+        self.refunds = refunds
+        self.split = split
+        self.chargeback = chargeback
+
+    def to_json(self) -> dict:
+        return {
+            'id': self.id,
+            'customer': self.customer.to_json(),
+            'dateCreated': self.dateCreated.strftime('%Y-%m-%d'),
+            'dueDate': self.dueDate.strftime('%Y-%m-%d'),
+            'value': self.value,
+            'installment': self.installment,
+            'subscription': self.subscription,
+            'paymentLink': self.paymentLink,
+            'netValue': self.netValue,
+            'billingType': self.billingType,
+            'status': self.status,
+            'description': self.description,
+            'externalReference': self.externalReference,
+            'canBePaidAfterDueDate': self.canBePaidAfterDueDate,
+            'pixTransaction': self.pixTransaction,
+            'pixQrCodeId': self.pixQrCodeId,
+            'originalValue': self.originalValue,
+            'interestValue': self.interestValue,
+            'originalDueDate': self.originalDueDate.strftime('%Y-%m-%d'),
+            'paymentDate': self.paymentDate.strftime('%Y-%m-%d'),
+            'clientPaymentDate': self.clientPaymentDate.strftime('%Y-%m-%d'),
+            'installmentNumber': self.installmentNumber,
+            'transactionReceiptUrl': self.transactionReceiptUrl,
+            'duplicatedPayment': self.duplicatedPayment,
+            'nossoNumero': self.nossoNumero,
+            'invoiceUrl': self.invoiceUrl,
+            'bankSlipUrl': self.bankSlipUrl,
+            'invoiceNumber': self.invoiceNumber,
+            'discount': self.discount.to_json(),
+            'fine': self.fine.to_json(),
+            'interest': self.interest.to_json(),
+            'deleted': self.deleted,
+            'postalService': self.postalService,
+            'anticipated': self.anticipated,
+            'anticipable': self.anticipable,
+            'refunds': [refund.to_json() for refund in self.refunds],
+            'split': [split.to_json() for split in self.split],
+            'chargeback': self.chargeback
         }
