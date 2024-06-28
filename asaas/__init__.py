@@ -1,16 +1,7 @@
 from asaas.exceptions import raise_for_status
-from asaas.customer import Customer
-from asaas.payments import (
-    BillingType,
-    Chargeback,
-    Payment,
-    Discount,
-    Interest,
-    Fine,
-    Refund,
-    Split,
-    Callback,
-    Status
+from asaas import (
+    customer,
+    payments
 )
 from asaas.utils import remove_none_and_empty_values
 
@@ -111,12 +102,12 @@ class Costumers:
     def retrieve(
         self,
         customer_id: str
-    ) -> Customer:
+    ) -> customer.Customer:
         """Retrieve a customer by ID"""
 
         response = self.asaas.get(f'{self.endpoint}/{customer_id}')
 
-        return Customer(**response.json())
+        return customer.Customer(**response.json())
 
     def create(
         self,
@@ -138,7 +129,7 @@ class Costumers:
         observations: Optional[str] = None,
         groupName: Optional[str] = None,
         company: Optional[str] = None
-    ) -> Customer:
+    ) -> customer.Customer:
         """Create a new customer"""
 
         data = remove_none_and_empty_values(
@@ -166,7 +157,7 @@ class Costumers:
 
         response = self.asaas.post(f'{self.endpoint}', data)
 
-        return Customer(**response.json())
+        return customer.Customer(**response.json())
 
     def list(
         self,
@@ -177,7 +168,7 @@ class Costumers:
         externalReference: Optional[str] = None,
         offset: Optional[int] = None,
         limit: Optional[int] = None
-    ) -> list[Customer]:
+    ) -> list[customer.Customer]:
         """List customers"""
 
         params = remove_none_and_empty_values(
@@ -194,7 +185,7 @@ class Costumers:
 
         response = self.asaas.get(self.endpoint, params)
 
-        return [Customer(**customer) for customer in response.json()['data']]
+        return [customer.Customer(**customer) for customer in response.json()['data']]
 
     def update(
         self,
@@ -217,7 +208,7 @@ class Costumers:
         observations: Optional[str] = None,
         groupName: Optional[str] = None,
         company: Optional[str] = None
-    ) -> Customer:
+    ) -> customer.Customer:
         """Update a customer by ID"""
 
         data = remove_none_and_empty_values(
@@ -248,7 +239,7 @@ class Costumers:
             data
         )
 
-        return Customer(**response.json())
+        return customer.Customer(**response.json())
 
     def delete(
         self,
@@ -261,12 +252,12 @@ class Costumers:
     def restore(
         self,
         customer_id: str
-    ) -> Customer:
+    ) -> customer.Customer:
         """Restore a customer by ID"""
 
         response = self.asaas.post(f'{self.endpoint}/{customer_id}/restore')
 
-        return Customer(**response.json())
+        return customer.Customer(**response.json())
 
 
 class Payments:
@@ -278,34 +269,34 @@ class Payments:
         self,
         data: dict
     ):
-        data['discount'] = Discount(
+        data['discount'] = payments.Discount(
             **data['discount']
         ) if data.get('discount') else None
 
-        data['interest'] = Interest(
+        data['interest'] = payments.Interest(
             **data['interest']
         ) if data.get('interest') else None
 
-        data['fine'] = Fine(**data['fine']) if data.get('fine') else None
+        data['fine'] = payments.Fine(**data['fine']) if data.get('fine') else None
 
         data['split'] = [
-            Split(**split) for split in data['split']
+            payments.Split(**split) for split in data['split']
         ] if data.get('split') else None
 
-        data['chargeback'] = Chargeback(
+        data['chargeback'] = payments.Chargeback(
             **data['chargeback']
         ) if data.get('chargeback') else None
 
         data['refunds'] = [
-            Refund(**refund) for refund in data['refunds']
+            payments.Refund(**refund) for refund in data['refunds']
         ] if data.get('refunds') else None
 
-        return Payment(**data)
+        return payments.Payment(**data)
 
     def retrieve(
         self,
         payment_id: str
-    ) -> Payment:
+    ) -> payments.Payment:
         """Retrieve a payment by ID"""
 
         response = self.asaas.get(f'{self.endpoint}/{payment_id}')
@@ -317,20 +308,20 @@ class Payments:
         customer: str,
         value: float,
         dueDate: date,
-        billingType: BillingType = BillingType.UNDEFINED,
+        billingType: payments.BillingType = payments.BillingType.UNDEFINED,
         description: Optional[str] = None,
         daysAfterDueDateToRegistrationCancellation: Optional[int] = None,
         externalReference: Optional[str] = None,
         installmentCount: Optional[int] = None,
         totalValue: Optional[float] = None,
         installmentValue: Optional[float] = None,
-        discount: Optional[Discount] = None,
-        interest: Optional[Interest] = None,
-        fine: Optional[Fine] = None,
+        discount: Optional[payments.Discount] = None,
+        interest: Optional[payments.Interest] = None,
+        fine: Optional[payments.Fine] = None,
         postalService: Optional[bool] = None,
-        split: Optional[Split] = None,
-        callback: Optional[Callback] = None
-    ) -> Payment:
+        split: Optional[payments.Split] = None,
+        callback: Optional[payments.Callback] = None
+    ) -> payments.Payment:
         discount = discount.to_dict() if discount else None
         interest = interest.to_dict() if interest else None
         fine = fine.to_dict() if fine else None
@@ -366,8 +357,8 @@ class Payments:
         self,
         customer: Optional[str] = None,
         customerGroupName: Optional[str] = None,
-        billingType: Optional[BillingType] = None,
-        status: Optional[Status] = None,
+        billingType: Optional[payments.BillingType] = None,
+        status: Optional[payments.Status] = None,
         subscription: Optional[str] = None,
         installment: Optional[str] = None,
         externalReference: Optional[str] = None,
@@ -387,7 +378,7 @@ class Payments:
         user: Optional[str] = None,
         offset: Optional[int] = None,
         limit: Optional[int] = None
-    ) -> list[Payment]:
+    ) -> list[payments.Payment]:
         """List payments"""
 
         params = remove_none_and_empty_values(
@@ -428,20 +419,20 @@ class Payments:
         customer: str,
         value: float,
         dueDate: date,
-        billingType: BillingType = BillingType.UNDEFINED,
+        billingType: payments.BillingType = payments.BillingType.UNDEFINED,
         description: Optional[str] = None,
         daysAfterDueDateToRegistrationCancellation: Optional[int] = None,
         externalReference: Optional[str] = None,
         installmentCount: Optional[int] = None,
         totalValue: Optional[float] = None,
         installmentValue: Optional[float] = None,
-        discount: Optional[Discount] = None,
-        interest: Optional[Interest] = None,
-        fine: Optional[Fine] = None,
+        discount: Optional[payments.Discount] = None,
+        interest: Optional[payments.Interest] = None,
+        fine: Optional[payments.Fine] = None,
         postalService: Optional[bool] = None,
-        split: Optional[Split] = None,
-        callback: Optional[Callback] = None
-    ) -> Payment:
+        split: Optional[payments.Split] = None,
+        callback: Optional[payments.Callback] = None
+    ) -> payments.Payment:
 
         discount = discount.to_dict() if discount else None
         interest = interest.to_dict() if interest else None
@@ -488,7 +479,7 @@ class Payments:
     def restore(
         self,
         payment_id: str
-    ) -> Payment:
+    ) -> payments.Payment:
         """Restore a payment by ID"""
 
         response = self.asaas.post(f'{self.endpoint}/{payment_id}/restore')
@@ -498,20 +489,20 @@ class Payments:
     def retrieve_payment_status(
         self,
         payment_id: str
-    ) -> Status:
+    ) -> payments.Status:
         """Retrieve a payment status by ID"""
 
         response = self.asaas.get(f'{self.endpoint}/{payment_id}/status')
 
-        return Status(**response.json())
+        return response.json()['status']
 
     def refund(
         self,
         payment_id: str,
         value: Optional[float] = None,
         description: Optional[str] = None
-    ) -> Payment:
-        """Refund a payment by ID"""
+    ) -> payments.Payment:
+        """payments.Refund a payment by ID"""
 
         data = remove_none_and_empty_values(
             {
