@@ -1,12 +1,12 @@
-from asaas.exceptions import raise_for_status
 from asaas import (
     customer,
-    payments
+    payments,
+    subscriptions
 )
 from asaas.utils import remove_none_and_empty_values
+from asaas.exceptions import raise_for_status
 
 import requests
-from requests import Response
 
 from typing import Optional
 
@@ -28,12 +28,13 @@ class Asaas:
 
         self.customers = Costumers(self)
         self.payments = Payments(self)
+        self.subscriptions = Subscriptions(self)
 
     def get(
         self,
         endpoint: str,
         params: Optional[dict] = None
-    ) -> Response:
+    ) -> requests.Response:
         """Make a GET request to Asaas API"""
 
         response = requests.get(
@@ -49,7 +50,7 @@ class Asaas:
         self,
         endpoint: str,
         data: dict
-    ) -> Response:
+    ) -> requests.Response:
         """Make a POST request to Asaas API"""
 
         response = requests.post(
@@ -65,7 +66,7 @@ class Asaas:
         self,
         endpoint: str,
         data: dict
-    ) -> Response:
+    ) -> requests.Response:
         """Make a PUT request to Asaas API"""
 
         response = requests.put(
@@ -80,7 +81,7 @@ class Asaas:
     def delete(
         self,
         endpoint: str
-    ) -> Response:
+    ) -> requests.Response:
         """Make a DELETE request to Asaas API"""
 
         response = requests.delete(
@@ -261,6 +262,8 @@ class Costumers:
 
 
 class Payments:
+    """Class to manage payments in Asaas API"""
+
     def __init__(self, asaas: Asaas):
         self.asaas = asaas
         self.endpoint = 'payments'
@@ -269,6 +272,8 @@ class Payments:
         self,
         data: dict
     ):
+        """Convert response data to Payment object"""
+
         data['discount'] = payments.Discount(
             **data['discount']
         ) if data.get('discount') else None
@@ -277,7 +282,8 @@ class Payments:
             **data['interest']
         ) if data.get('interest') else None
 
-        data['fine'] = payments.Fine(**data['fine']) if data.get('fine') else None
+        data['fine'] = payments.Fine(
+            **data['fine']) if data.get('fine') else None
 
         data['split'] = [
             payments.Split(**split) for split in data['split']
@@ -486,7 +492,7 @@ class Payments:
 
         return self.response_data_to_payment(response.json())
 
-    def retrieve_payment_status(
+    def retrieve_status(
         self,
         payment_id: str
     ) -> payments.Status:
@@ -515,3 +521,214 @@ class Payments:
             f'{self.endpoint}/{payment_id}/refund', data)
 
         return self.response_data_to_payment(response.json())
+
+
+class Subscriptions:
+    """Class to manage subscriptions in Asaas API"""
+
+    def __init__(self, asaas: Asaas):
+        self.asaas = asaas
+        self.endpoint = 'subscriptions'
+
+    def response_data_to_subscription(
+        self,
+        data: dict
+    ):
+        """Convert response data to Subscription object"""
+
+        data['cicle'] = subscriptions.Cycle(
+            **data['cicle']
+        )
+
+        data['status'] = subscriptions.Status(
+            data['status']
+        )
+
+        data['discount'] = payments.Discount(
+            **data['discount']
+        ) if data.get('discount') else None
+
+        data['interest'] = payments.Interest(
+            **data['interest']
+        ) if data.get('interest') else None
+
+        data['fine'] = payments.Fine(
+            **data['fine']) if data.get('fine') else None
+
+        data['split'] = [
+            payments.Split(**split) for split in data['split']
+        ] if data.get('split') else None
+
+        return subscriptions.Subscription(**data)
+
+    def retrieve(
+        self,
+        subscription_id: str
+    ) -> subscriptions.Subscription:
+        """Retrieve a subscription by ID"""
+
+        response = self.asaas.get(f'{self.endpoint}/{subscription_id}')
+
+        return self.response_data_to_subscription(response.json())
+
+    def create(
+        self,
+        customer: str,
+        billingType: subscriptions.BillingType,
+        value: float,
+        nextDueDate: date,
+        cycle: subscriptions.Cycle,
+        discount: Optional[payments.Discount] = None,
+        interest: Optional[payments.Interest] = None,
+        fine: Optional[payments.Fine] = None,
+        description: Optional[str] = None,
+        endDate: Optional[date] = None,
+        maxPayments: Optional[int] = None,
+        externalReference: Optional[str] = None,
+        split: Optional[list[payments.Split]] = None,
+        callback: Optional[payments.Callback] = None
+    ) -> subscriptions.Subscription:
+        """Create a new subscription"""
+
+        discount = discount.to_dict() if discount else None
+        interest = interest.to_dict() if interest else None
+        fine = fine.to_dict() if fine else None
+        split = split.to_dict() if split else None
+        callback = callback.to_dict() if callback else None
+
+        data = remove_none_and_empty_values(
+            {
+                'customer': customer,
+                'billingType': billingType.value,
+                'value': value,
+                'nextDueDate': nextDueDate.strftime('%Y-%m-%d'),
+                'cycle': cycle,
+                'discount': discount,
+                'interest': interest,
+                'fine': fine,
+                'description': description,
+                'endDate': endDate.strftime('%Y-%m-%d') if endDate else None,
+                'maxPayments': maxPayments,
+                'externalReference': externalReference,
+                'split': split,
+                'callback': callback
+            }
+        )
+
+        response = self.asaas.post(f'{self.endpoint}', data)
+
+        return self.response_data_to_subscription(response.json())
+
+    def list(
+        self,
+        customer: Optional[str] = None,
+        customerGroupName: Optional[str] = None,
+        billingType: Optional[subscriptions.BillingType] = None,
+        status: Optional[subscriptions.Status] = None,
+        deletedOnly: Optional[bool] = None,
+        includeDeleted: Optional[bool] = None,
+        externalReference: Optional[str] = None,
+        order: Optional[subscriptions.Order] = None,
+        sort: Optional[subscriptions.Sort] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None
+    ) -> list[subscriptions.Subscription]:
+        """List subscriptions"""
+
+        params = remove_none_and_empty_values(
+            {
+                'customer': customer,
+                'customerGroupName': customerGroupName,
+                'billingType': billingType.value if billingType else None,
+                'status': status.value if status else None,
+                'deletedOnly': deletedOnly,
+                'includeDeleted': includeDeleted,
+                'externalReference': externalReference,
+                'order': order.value if order else None,
+                'sort': sort.value if sort else None,
+                'offset': offset,
+                'limit': limit
+            }
+        )
+
+        response = self.asaas.get(self.endpoint, params)
+
+        return [self.response_data_to_subscription(subscription) for subscription in response.json()['data']]
+
+    def update(
+        self,
+        subscription_id: str,
+        billingType: Optional[subscriptions.BillingType] = None,
+        value: Optional[float] = None,
+        status: Optional[subscriptions.Status] = None,
+        nextDueDate: Optional[date] = None,
+        discount: Optional[payments.Discount] = None,
+        interest: Optional[payments.Interest] = None,
+        fine: Optional[payments.Fine] = None,
+        cycle: Optional[subscriptions.Cycle] = None,
+        description: Optional[str] = None,
+        endDate: Optional[date] = None,
+        updatePendingPayments: Optional[bool] = None,
+        externalReference: Optional[str] = None,
+        split: Optional[list[payments.Split]] = None,
+        callback: Optional[payments.Callback] = None
+    ) -> subscriptions.Subscription:
+        """Update a subscription by ID"""
+
+        discount = discount.to_dict() if discount else None
+        interest = interest.to_dict() if interest else None
+        fine = fine.to_dict() if fine else None
+        split = split.to_dict() if split else None
+        callback = callback.to_dict() if callback else None
+
+        data = remove_none_and_empty_values(
+            {
+                'billingType': billingType.value if billingType else None,
+                'value': value,
+                'status': status.value if status else None,
+                'nextDueDate': nextDueDate.strftime('%Y-%m-%d') if nextDueDate else None,
+                'discount': discount,
+                'interest': interest,
+                'fine': fine,
+                'cycle': cycle,
+                'description': description,
+                'endDate': endDate.strftime('%Y-%m-%d') if endDate else None,
+                'updatePendingPayments': updatePendingPayments,
+                'externalReference': externalReference,
+                'split': split,
+                'callback': callback
+            }
+        )
+
+        response = self.asaas.put(
+            f'{self.endpoint}/{subscription_id}',
+            data
+        )
+
+        return self.response_data_to_subscription(response.json())
+
+    def delete(
+        self,
+        subscription_id: str
+    ) -> None:
+        """Delete a subscription by ID"""
+
+        self.asaas.delete(f'subscriptions/{subscription_id}')
+
+    def list_payments(
+        self,
+        subscription_id: str,
+        status: Optional[payments.Status] = None,
+    ) -> list[payments.Payment]:
+        """List payments of a subscription"""
+
+        params = remove_none_and_empty_values(
+            {
+                'status': status.value if status else None,
+            }
+        )
+
+        response = self.asaas.get(
+            f'{self.endpoint}/{subscription_id}/payments', params)
+
+        return [payments.Payment(**payment) for payment in response.json()['data']]
