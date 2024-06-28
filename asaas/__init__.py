@@ -339,7 +339,7 @@ class Payments:
                 'customer': customer,
                 'billingType': billingType.value,
                 'value': value,
-                'dueDate': dueDate,
+                'dueDate': dueDate.strftime('%Y-%m-%d'),
                 'description': description,
                 'daysAfterDueDateToRegistrationCancellation': daysAfterDueDateToRegistrationCancellation,
                 'externalReference': externalReference,
@@ -422,10 +422,9 @@ class Payments:
     def update(
         self,
         payment_id: str,
-        customer: str,
-        value: float,
-        dueDate: date,
-        billingType: payments.BillingType = payments.BillingType.UNDEFINED,
+        value: Optional[float] = None,
+        dueDate: Optional[date] = None,
+        billingType: Optional[payments.BillingType] = None,
         description: Optional[str] = None,
         daysAfterDueDateToRegistrationCancellation: Optional[int] = None,
         externalReference: Optional[str] = None,
@@ -448,10 +447,9 @@ class Payments:
 
         data = remove_none_and_empty_values(
             {
-                'customer': customer,
                 'billingType': billingType.value,
                 'value': value,
-                'dueDate': dueDate,
+                'dueDate': dueDate.strftime('%Y-%m-%d') if dueDate else None,
                 'description': description,
                 'daysAfterDueDateToRegistrationCancellation': daysAfterDueDateToRegistrationCancellation,
                 'externalReference': externalReference,
