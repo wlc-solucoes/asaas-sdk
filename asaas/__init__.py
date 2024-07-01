@@ -8,7 +8,10 @@ from asaas.exceptions import raise_for_status
 
 import requests
 
-from typing import Optional
+from typing import (
+    Optional,
+    List
+)
 
 from datetime import date
 
@@ -169,7 +172,7 @@ class Costumers:
         externalReference: Optional[str] = None,
         offset: Optional[int] = None,
         limit: Optional[int] = None
-    ) -> list[customer.Customer]:
+    ) -> List[customer.Customer]:
         """List customers"""
 
         params = remove_none_and_empty_values(
@@ -186,7 +189,7 @@ class Costumers:
 
         response = self.asaas.get(self.endpoint, params)
 
-        return [customer.Customer(**customer) for customer in response.json()['data']]
+        return [customer.Customer(**customer_dict) for customer_dict in response.json()['data']]
 
     def update(
         self,
@@ -384,7 +387,7 @@ class Payments:
         user: Optional[str] = None,
         offset: Optional[int] = None,
         limit: Optional[int] = None
-    ) -> list[payments.Payment]:
+    ) -> List[payments.Payment]:
         """List payments"""
 
         params = remove_none_and_empty_values(
@@ -583,7 +586,7 @@ class Subscriptions:
         endDate: Optional[date] = None,
         maxPayments: Optional[int] = None,
         externalReference: Optional[str] = None,
-        split: Optional[list[payments.Split]] = None,
+        split: Optional[List[payments.Split]] = None,
         callback: Optional[payments.Callback] = None
     ) -> subscriptions.Subscription:
         """Create a new subscription"""
@@ -630,7 +633,7 @@ class Subscriptions:
         sort: Optional[subscriptions.Sort] = None,
         offset: Optional[int] = None,
         limit: Optional[int] = None
-    ) -> list[subscriptions.Subscription]:
+    ) -> List[subscriptions.Subscription]:
         """List subscriptions"""
 
         params = remove_none_and_empty_values(
@@ -668,7 +671,7 @@ class Subscriptions:
         endDate: Optional[date] = None,
         updatePendingPayments: Optional[bool] = None,
         externalReference: Optional[str] = None,
-        split: Optional[list[payments.Split]] = None,
+        split: Optional[List[payments.Split]] = None,
         callback: Optional[payments.Callback] = None
     ) -> subscriptions.Subscription:
         """Update a subscription by ID"""
@@ -717,7 +720,7 @@ class Subscriptions:
         self,
         subscription_id: str,
         status: Optional[payments.Status] = None,
-    ) -> list[payments.Payment]:
+    ) -> List[payments.Payment]:
         """List payments of a subscription"""
 
         params = remove_none_and_empty_values(
