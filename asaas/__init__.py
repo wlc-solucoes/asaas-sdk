@@ -264,13 +264,7 @@ class Costumers:
         return customer.Customer(**response.json())
 
 
-class Payments:
-    """Class to manage payments in Asaas API"""
-
-    def __init__(self, asaas: Asaas):
-        self.asaas = asaas
-        self.endpoint = 'payments'
-
+class ResponseDataToPayment:
     def response_data_to_payment(
         self,
         data: dict
@@ -301,6 +295,14 @@ class Payments:
         ] if data.get('refunds') else None
 
         return payments.Payment(**data)
+
+
+class Payments(ResponseDataToPayment):
+    """Class to manage payments in Asaas API"""
+
+    def __init__(self, asaas: Asaas):
+        self.asaas = asaas
+        self.endpoint = 'payments'
 
     def retrieve(
         self,
@@ -524,7 +526,7 @@ class Payments:
         return self.response_data_to_payment(response.json())
 
 
-class Subscriptions:
+class Subscriptions(ResponseDataToPayment):
     """Class to manage subscriptions in Asaas API"""
 
     def __init__(self, asaas: Asaas):
@@ -594,7 +596,7 @@ class Subscriptions:
         discount = discount.to_dict() if discount else None
         interest = interest.to_dict() if interest else None
         fine = fine.to_dict() if fine else None
-        split = split.to_dict() if split else None
+        split = [s.to_dict() for s in split] if split else None
         callback = callback.to_dict() if callback else None
 
         data = remove_none_and_empty_values(
@@ -679,7 +681,7 @@ class Subscriptions:
         discount = discount.to_dict() if discount else None
         interest = interest.to_dict() if interest else None
         fine = fine.to_dict() if fine else None
-        split = split.to_dict() if split else None
+        split = [s.to_dict() for s in split] if split else None
         callback = callback.to_dict() if callback else None
 
         data = remove_none_and_empty_values(
@@ -732,4 +734,4 @@ class Subscriptions:
         response = self.asaas.get(
             f'{self.endpoint}/{subscription_id}/payments', params)
 
-        return [payments.Payment(**payment) for payment in response.json()['data']]
+        return self.response_data_to_payment(response.json()['data'])
