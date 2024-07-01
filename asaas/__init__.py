@@ -328,13 +328,13 @@ class Payments:
         interest: Optional[payments.Interest] = None,
         fine: Optional[payments.Fine] = None,
         postalService: Optional[bool] = None,
-        split: Optional[payments.Split] = None,
+        split: Optional[List[payments.Split]] = None,
         callback: Optional[payments.Callback] = None
     ) -> payments.Payment:
         discount = discount.to_dict() if discount else None
         interest = interest.to_dict() if interest else None
         fine = fine.to_dict() if fine else None
-        split = split.to_dict() if split else None
+        split = [s.to_dict() for s in split] if split else None
         callback = callback.to_dict() if callback else None
 
         data = remove_none_and_empty_values(
@@ -438,14 +438,14 @@ class Payments:
         interest: Optional[payments.Interest] = None,
         fine: Optional[payments.Fine] = None,
         postalService: Optional[bool] = None,
-        split: Optional[payments.Split] = None,
+        split: Optional[List[payments.Split]] = None,
         callback: Optional[payments.Callback] = None
     ) -> payments.Payment:
 
         discount = discount.to_dict() if discount else None
         interest = interest.to_dict() if interest else None
         fine = fine.to_dict() if fine else None
-        split = split.to_dict() if split else None
+        split = [s.to_dict() for s in split] if split else None
         callback = callback.to_dict() if callback else None
 
         data = remove_none_and_empty_values(
