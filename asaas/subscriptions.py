@@ -83,7 +83,8 @@ class Subscription:
         deleted: Optional[bool] = None,
         maxPayments: Optional[int] = None,
         externalReference: Optional[str] = None,
-        split: Optional[list[payments.Split]] = None
+        split: Optional[list[payments.Split]] = None,
+        **kwargs
     ):
         self.id = id
 
