@@ -17,7 +17,7 @@ class Cycle:
     ANNUALLY = 'ANNUALLY'
 
 
-class BillingType(Enum):
+class BillingType:
     """Billing type for payment of subscription"""
 
     BOLETO = 'BOLETO'
@@ -26,7 +26,7 @@ class BillingType(Enum):
     PIX = 'PIX'
 
 
-class Status(Enum):
+class Status:
     """Status of subscription"""
 
     ACTIVE = 'ACTIVE'
@@ -34,14 +34,14 @@ class Status(Enum):
     EXPIRED = 'EXPIRED'
 
 
-class Order(Enum):
+class Order:
     """Order for subscription"""
 
     ASC = 'asc'
     DESC = 'desc'
 
 
-class Sort(Enum):
+class Sort:
     """Sort for subscription"""
 
     ID = 'id'
@@ -83,7 +83,8 @@ class Subscription:
         deleted: Optional[bool] = None,
         maxPayments: Optional[int] = None,
         externalReference: Optional[str] = None,
-        split: Optional[list[payments.Split]] = None
+        split: Optional[list[payments.Split]] = None,
+        **kwargs
     ):
         self.id = id
 
