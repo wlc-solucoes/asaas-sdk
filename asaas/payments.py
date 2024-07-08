@@ -3,7 +3,7 @@ from datetime import date
 from enum import Enum
 
 
-class Status(Enum):
+class Status:
     """Status for payment"""
 
     PENDING = 'PENDING'
@@ -22,7 +22,7 @@ class Status(Enum):
     AWAITING_RISK_ANALYSIS = 'AWAITING_RISK_ANALYSIS'
 
 
-class BillingType(Enum):
+class BillingType:
     """Billing type for payment"""
 
     BOLETO = 'BOLETO'
@@ -161,7 +161,7 @@ class Split:
 class Chargeback:
     """Chargeback object for payment"""
 
-    class Status(Enum):
+    class Status:
         """Status for chargeback"""
         REQUESTED = 'REQUESTED'
         IN_DISPUTE = 'IN_DISPUTE'
@@ -169,7 +169,7 @@ class Chargeback:
         REVERSED = 'REVERSED'
         DONE = 'DONE'
 
-    class Reason(Enum):
+    class Reason:
         """Reason for chargeback"""
         ABSENCE_OF_PRINT = 'ABSENCE_OF_PRINT'
         ABSENT_CARD_FRAUD = 'ABSENT_CARD_FRAUD'
