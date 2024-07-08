@@ -102,6 +102,13 @@ class Costumers:
     def __init__(self, asaas: Asaas):
         self.asaas = asaas
         self.endpoint = 'customers'
+        
+    
+    def response_data_to_customer(
+        self,
+        data: dict
+    ):
+        return customer.Customer(**data)
 
     def retrieve(
         self,
@@ -111,7 +118,7 @@ class Costumers:
 
         response = self.asaas.get(f'{self.endpoint}/{customer_id}')
 
-        return customer.Customer(**response.json())
+        return self.response_data_to_customer(response.json())
 
     def create(
         self,
@@ -161,7 +168,7 @@ class Costumers:
 
         response = self.asaas.post(f'{self.endpoint}', data)
 
-        return customer.Customer(**response.json())
+        return self.response_data_to_customer(response.json())
 
     def list(
         self,
@@ -189,7 +196,7 @@ class Costumers:
 
         response = self.asaas.get(self.endpoint, params)
 
-        return [customer.Customer(**customer_dict) for customer_dict in response.json()['data']]
+        return [self.response_data_to_customer(customer_dict) for customer_dict in response.json()['data']]
 
     def update(
         self,
@@ -243,7 +250,7 @@ class Costumers:
             data
         )
 
-        return customer.Customer(**response.json())
+        return self.response_data_to_customer(response.json())
 
     def delete(
         self,
@@ -261,7 +268,7 @@ class Costumers:
 
         response = self.asaas.post(f'{self.endpoint}/{customer_id}/restore')
 
-        return customer.Customer(**response.json())
+        return self.response_data_to_customer(response.json())
 
 
 class ResponseDataToPayment:
@@ -539,14 +546,6 @@ class Subscriptions(ResponseDataToPayment):
     ):
         """Convert response data to Subscription object"""
 
-        data['cicle'] = subscriptions.Cycle(
-            **data['cicle']
-        )
-
-        data['status'] = subscriptions.Status(
-            data['status']
-        )
-
         data['discount'] = payments.Discount(
             **data['discount']
         ) if data.get('discount') else None
@@ -556,7 +555,8 @@ class Subscriptions(ResponseDataToPayment):
         ) if data.get('interest') else None
 
         data['fine'] = payments.Fine(
-            **data['fine']) if data.get('fine') else None
+            **data['fine']
+        ) if data.get('fine') else None
 
         data['split'] = [
             payments.Split(**split) for split in data['split']
