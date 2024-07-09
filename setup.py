@@ -6,7 +6,7 @@ from setuptools import (
 setup(
     name='asaas-sdk-wlc',
     packages=find_packages(include=['asaas']),
-    version='0.1.4',
+    version='0.1.5',
     license='Apache-2.0',
     description='SDK for Asaas API',
     author='WLC Soluções',
