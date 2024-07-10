@@ -32,6 +32,7 @@ class BillingType:
     TRANSFER = 'TRANSFER'
     DEPOSIT = 'DEPOSIT'
     PIX = 'PIX'
+    RECEIVED_IN_CASH = 'RECEIVED_IN_CASH'
 
 
 class Discount:
