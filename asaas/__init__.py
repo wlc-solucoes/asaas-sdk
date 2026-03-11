@@ -24,7 +24,7 @@ class Asaas:
         api_key: str,
         production: bool = False
     ):
-        self.base_url = 'https://www.asaas.com/api/v3' if production else 'https://sandbox.asaas.com/api/v3'
+        self.base_url = 'https://api.asaas.com/' if production else 'https://api-sandbox.asaas.com/'
         self.headers = {
             'access_token': api_key
         }
