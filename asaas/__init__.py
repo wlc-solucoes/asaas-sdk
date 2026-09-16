@@ -24,7 +24,7 @@ class Asaas:
         api_key: str,
         production: bool = False
     ):
-        self.base_url = 'https://api.asaas.com/' if production else 'https://api-sandbox.asaas.com/'
+        self.base_url = 'https://api.asaas.com/v3' if production else 'https://api-sandbox.asaas.com/v3'
         self.headers = {
             'access_token': api_key
         }
@@ -41,7 +41,7 @@ class Asaas:
         """Make a GET request to Asaas API"""
 
         response = requests.get(
-            f'{self.base_url}/{endpoint}/',
+            f'{self.base_url}/{endpoint}',
             headers=self.headers,
             params=params
         )
@@ -57,7 +57,7 @@ class Asaas:
         """Make a POST request to Asaas API"""
 
         response = requests.post(
-            f'{self.base_url}/{endpoint}/',
+            f'{self.base_url}/{endpoint}',
             headers=self.headers,
             json=data
         )
@@ -73,7 +73,7 @@ class Asaas:
         """Make a PUT request to Asaas API"""
 
         response = requests.put(
-            f'{self.base_url}/{endpoint}/',
+            f'{self.base_url}/{endpoint}',
             headers=self.headers,
             json=data
         )
@@ -88,7 +88,7 @@ class Asaas:
         """Make a DELETE request to Asaas API"""
 
         response = requests.delete(
-            f'{self.base_url}/{endpoint}/',
+            f'{self.base_url}/{endpoint}',
             headers=self.headers
         )
         raise_for_status(response)
@@ -349,7 +349,7 @@ class Payments(ResponseDataToPayment):
         data = remove_none_and_empty_values(
             {
                 'customer': customer,
-                'billingType': billingType.value,
+                'billingType': billingType,
                 'value': value,
                 'dueDate': dueDate.strftime('%Y-%m-%d'),
                 'description': description,
@@ -403,8 +403,8 @@ class Payments(ResponseDataToPayment):
             {
                 'customer': customer,
                 'customerGroupName': customerGroupName,
-                'billingType': billingType.value if billingType else None,
-                'status': status.value if status else None,
+                'billingType': billingType,
+                'status': status,
                 'subscription': subscription,
                 'installment': installment,
                 'externalReference': externalReference,
@@ -459,7 +459,7 @@ class Payments(ResponseDataToPayment):
 
         data = remove_none_and_empty_values(
             {
-                'billingType': billingType.value,
+                'billingType': billingType,
                 'value': value,
                 'dueDate': dueDate.strftime('%Y-%m-%d') if dueDate else None,
                 'description': description,
@@ -602,7 +602,7 @@ class Subscriptions(ResponseDataToPayment):
         data = remove_none_and_empty_values(
             {
                 'customer': customer,
-                'billingType': billingType.value,
+                'billingType': billingType,
                 'value': value,
                 'nextDueDate': nextDueDate.strftime('%Y-%m-%d'),
                 'cycle': cycle,
@@ -642,13 +642,13 @@ class Subscriptions(ResponseDataToPayment):
             {
                 'customer': customer,
                 'customerGroupName': customerGroupName,
-                'billingType': billingType.value if billingType else None,
-                'status': status.value if status else None,
+                'billingType': billingType,
+                'status': status,
                 'deletedOnly': deletedOnly,
                 'includeDeleted': includeDeleted,
                 'externalReference': externalReference,
-                'order': order.value if order else None,
-                'sort': sort.value if sort else None,
+                'order': order,
+                'sort': sort,
                 'offset': offset,
                 'limit': limit
             }
@@ -686,9 +686,9 @@ class Subscriptions(ResponseDataToPayment):
 
         data = remove_none_and_empty_values(
             {
-                'billingType': billingType.value if billingType else None,
+                'billingType': billingType,
                 'value': value,
-                'status': status.value if status else None,
+                'status': status,
                 'nextDueDate': nextDueDate.strftime('%Y-%m-%d') if nextDueDate else None,
                 'discount': discount,
                 'interest': interest,
