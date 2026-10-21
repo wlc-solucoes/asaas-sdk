@@ -6,14 +6,14 @@ from setuptools import (
 setup(
     name='asaas-sdk-wlc',
     packages=find_packages(include=['asaas']),
-    version='0.2.1',
+    version='0.3.0',
     license='Apache-2.0',
     description='SDK for Asaas API',
     author='WLC Soluções',
     author_email='fernando.leite@wlcsolucoes.com.br',
     url='https://github.com/wlc-solucoes/asaas-sdk/',
     install_requires=[
-        'requests'
+        'requests>=2.33.0'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
