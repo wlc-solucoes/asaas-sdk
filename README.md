@@ -224,3 +224,41 @@ payment = asaas.payments.refund(
 )
 
 ```
+## Novidades da 0.3.0
+
+```py
+asaas = Asaas(api_key=ACCESS_TOKEN, production=False, user_agent='oegadv', timeout=30)
+
+# Boleto: linha digitável, Pix e recebimento em dinheiro
+asaas.payments.identification_field('pay_123').identificationField
+asaas.payments.pix_qr_code('pay_123').payload
+asaas.payments.receive_in_cash('pay_123', paymentDate=date.today(), value=150.0)
+asaas.payments.undo_received_in_cash('pay_123')
+
+# Parcelamento e carnê (valor igual por parcela, vencimento mensal)
+installment = asaas.installments.create(customer='cus_1', installmentCount=3, value=100.0,
+                                        dueDate=date(2026, 11, 10), billingType='BOLETO')
+asaas.installments.list_payments(installment.id)
+pdf_bytes = asaas.installments.payment_book(installment.id)
+
+# NFS-e
+from asaas import invoices
+invoice = asaas.invoices.schedule(serviceDescription='Honorários', value=150.0,
+                                  effectiveDate=date.today(), payment='pay_123',
+                                  municipalServiceCode='17.14', taxes=invoices.Taxes(iss=2.0),
+                                  externalReference='minha-ref')
+asaas.invoices.authorize(invoice.id)
+asaas.invoices.cancel(invoice.id)
+asaas.fiscal_info.municipal_options()
+asaas.fiscal_info.services(description='advocacia')
+
+# Webhooks (o authToken chega no header `asaas-access-token`)
+asaas.webhooks.create(name='oegadv', url='https://...', email='ti@...', authToken='...',
+                      events=['PAYMENT_RECEIVED', 'INVOICE_AUTHORIZED'])
+```
+
+Recursos novos devolvem `AsaasObject` (dicionário com acesso por atributo) e `AsaasList`
+(`has_more`, `total_count`), para que campos novos do Asaas não quebrem o SDK. Erros trazem
+`code`, `status_code` e `errors`; falha de rede vira `AsaasConnectionError`.
+
+Testes: `python -m unittest discover -s tests -t .`
